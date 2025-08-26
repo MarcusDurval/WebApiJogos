@@ -1,0 +1,14 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Compilação
+bin/
+obj/
+Debug/
+Release/
+
+# Outros
+*.log
+
