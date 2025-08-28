@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Project.Web.Api.JogoDTO;
 using Project.Web.Api.Models;
@@ -11,10 +12,12 @@ namespace Project.Web.Api.Controllers
     public class JogosController : ControllerBase
     {
         private readonly IJogoRepository _Repository;
+        private readonly IMapper _Mapper;
 
-        public JogosController(IJogoRepository repository)
+        public JogosController(IJogoRepository repository, IMapper mapper)
         {
-            _Repository = repository;
+            _Repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         [HttpPost]
@@ -25,21 +28,26 @@ namespace Project.Web.Api.Controllers
                 return BadRequest("Nome do jogo é obrigatório.");
             }
 
-            var AddJogos = new Jogos(JogosDto.Nome);
+            var JogoMapping = _Mapper.Map<Jogos>(JogosDto);
 
-            _Repository.Add(AddJogos);
+            _Repository.Add(JogoMapping);
 
-            return Ok(AddJogos);
+            //var AddJogos = new Jogos(JogosDto.Nome);
+
+            //_Repository.Add(AddJogos);
+
+            var jogoDto = _Mapper.Map<JogosDto>(JogoMapping);
+
+            return Ok(jogoDto);
+
+            
         }
 
         [HttpGet]
         public IActionResult GetAll()
         {
             var jogos = _Repository.GetAll();
-            if(jogos == null)
-            {
-                return BadRequest();
-            }
+           
             return Ok(jogos);
         }
     }
