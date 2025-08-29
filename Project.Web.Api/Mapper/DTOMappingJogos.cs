@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
-using Project.Web.Api.JogoDTO;
-using Project.Web.Api.Models;
+using Project.Web.Api.Domain.JogoDTO;
+using Project.Web.Api.Domain.Models;
 
 namespace Project.Web.Api.Mapper
 {
-    public class DTOMapping : Profile
+    public class DTOMappingJogos : Profile
     {
-        public DTOMapping()
+        public DTOMappingJogos()
         {
             CreateMap<Jogos, JogosDto>();
 

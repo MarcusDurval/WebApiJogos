@@ -1,4 +1,4 @@
-﻿namespace Project.Web.Api.CategoriaDTO
+﻿namespace Project.Web.Api.Domain.CategoriaDTO
 {
     public class CategoriasDTO
     {

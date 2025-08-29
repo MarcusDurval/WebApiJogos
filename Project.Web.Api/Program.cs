@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using Project.Web.Api.CategoriaRepository;
-using Project.Web.Api.Data;
+using Project.Web.Api.Infrastructure.CategoriaRepository;
+using Project.Web.Api.Infrastructure.Data;
+using Project.Web.Api.Infrastructure.JogosRepository;
 using Project.Web.Api.Mapper;
-using Project.Web.Api.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,8 +16,12 @@ builder.Services.AddDbContext<AppDbContext>(Options =>
 });
 
 builder.Services.AddTransient<IJogoRepository,JogoRepository>();
+
 builder.Services.AddTransient<ICategoriaRepository, CategoriaRepository>();
-builder.Services.AddAutoMapper(typeof(DTOMapping));
+
+builder.Services.AddAutoMapper(typeof(DTOMappingJogos));
+
+builder.Services.AddAutoMapper(typeof(DTOMappingCategoria));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

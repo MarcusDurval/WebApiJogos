@@ -1,8 +1,7 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Project.Web.Api.Models
+namespace Project.Web.Api.Domain.Models
 {
     public class Categoria_Jogos
     {

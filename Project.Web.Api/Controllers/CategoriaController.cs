@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Project.Web.Api.CategoriaDTO;
-using Project.Web.Api.CategoriaRepository;
-using Project.Web.Api.Models;
+using Project.Web.Api.Domain.CategoriaDTO;
+using Project.Web.Api.Domain.Models;
+using Project.Web.Api.Infrastructure.CategoriaRepository;
+using Project.Web.Api.Infrastructure.JogosRepository;
+using Project.Web.Api.Mapper;
 
 namespace Project.Web.Api.Controllers
 {
@@ -10,27 +13,36 @@ namespace Project.Web.Api.Controllers
     [ApiController]
     public class CategoriaController : ControllerBase
     {
-        private readonly ICategoriaRepository _Repository;
+        private readonly ICategoriaRepository _repository;
+        private readonly IMapper _mapper;
 
-        public CategoriaController(ICategoriaRepository repository)
+        public CategoriaController(ICategoriaRepository repository, IMapper mapper)
         {
-            _Repository = repository;
+            _repository = repository  ?? throw new ArgumentNullException(nameof(repository)); 
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper)); 
+
         }
 
         [HttpPost]
-        public IActionResult Add(CategoriasDTO categorias)
+        public IActionResult Add([FromBody]CategoriasDTO categoriasdto)
         {
-            var Categoria = new Categoria_Jogos(categorias.Categoria,categorias.JogoId);
+            if (categoriasdto == null || string.IsNullOrWhiteSpace(categoriasdto.Categoria))
+            {
+                return BadRequest("Nome do jogo é obrigatório.");
+            }
+            var categoriaMapper = _mapper.Map<Categoria_Jogos>(categoriasdto);
 
-            _Repository.Add(Categoria);
+            _repository.Add(categoriaMapper);
 
-            return Ok(Categoria);
+            var CategoriaM = _mapper.Map<CategoriasDTO>(categoriaMapper);
+
+            return Ok(CategoriaM);
         }
 
         [HttpGet]
         public IActionResult Get()
         {
-            var Categoria = _Repository.GetAll();
+            var Categoria = _repository.GetAll();
 
             return Ok(Categoria);
         }
