@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Azure.Messaging;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Project.Web.Api.Domain.Models;
 using Project.Web.Api.Infrastructure.Data;
+using System.Drawing;
 
 namespace Project.Web.Api.Infrastructure.JogosRepository
 {
@@ -12,50 +16,53 @@ namespace Project.Web.Api.Infrastructure.JogosRepository
         {
             _context = context;
         }
-
-        public void Add(Jogos jogos)
+        public async Task Add(Jogos jogos)
         {
-            _context.Biblioteca_Jogos.Add(jogos);   
-            _context.SaveChanges();
+            _context.Biblioteca_Jogos.Add(jogos);
+            await _context.SaveChangesAsync();
         }
 
-        public Jogos Delete(int id)
+        public async Task<Jogos> Delete(int id)
         {
-            var deleteJogos = _context.Biblioteca_Jogos.FirstOrDefault(d => d.ID_Jogo == id);
-
-            if(deleteJogos != null)
+            var jogos =  await _context.Biblioteca_Jogos.FirstOrDefaultAsync(j => j.ID_Jogo == id);
+            if(jogos != null)
             {
-                _context.Biblioteca_Jogos.Remove(deleteJogos);
-                _context.SaveChanges();
+                _context.Biblioteca_Jogos.Remove(jogos);
+                await _context.SaveChangesAsync();
+            }
+             return jogos;
+        }
+
+        public async Task<List<Jogos>> GetAll(int page, int size)
+        {
+            return await _context.Biblioteca_Jogos
+                .Skip((page -1) * size)
+                .Take(size)
+                .ToListAsync();
+        }
+
+        public async Task<Jogos> GetById(int id)
+        {
+           var ObterJogos = await _context.Biblioteca_Jogos.FindAsync(id);
+
+            if(ObterJogos == null)
+            {
+                return null;
             }
 
-            
-            return deleteJogos;
+            return ObterJogos;
         }
 
-        public List<Jogos> GetAll()
+        public async Task<Jogos> Update(Jogos jogos)
         {
-            return _context.Biblioteca_Jogos.ToList();
-        }
-
-        public Jogos GetById(int id)
-        {
-            return _context.Biblioteca_Jogos.Find(id);
-        }
-
-        public Jogos Update(Jogos jogos)
-        {
-            var updateJogos = _context.Biblioteca_Jogos.Find(jogos.ID_Jogo);
-            if (updateJogos != null)
+            var jogosAtualizados = await _context.Biblioteca_Jogos.FindAsync(jogos.ID_Jogo);
+            if(jogosAtualizados != null)
             {
-                updateJogos.Nome = jogos.Nome;
-
-                _context.SaveChanges(); 
+                jogosAtualizados.Nome = jogos.Nome;
+                await _context.SaveChangesAsync();
             }
 
-          
-
-            return updateJogos;
+            return jogosAtualizados;
         }
     }
 }

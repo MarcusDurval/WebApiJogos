@@ -21,7 +21,7 @@ namespace Project.Web.Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult Add([FromBody] JogosDto jogosDto)
+        public async Task<IActionResult> Add([FromBody] JogosDto jogosDto)
         {
             if (jogosDto == null || string.IsNullOrWhiteSpace(jogosDto.Nome))
             {
@@ -30,7 +30,7 @@ namespace Project.Web.Api.Controllers
 
             var JogoMapping = _Mapper.Map<Jogos>(jogosDto);
 
-            _Repository.Add(JogoMapping);
+            await _Repository.Add(JogoMapping);
 
 
             var Jogos = _Mapper.Map<JogosDto>(JogoMapping);
@@ -41,36 +41,40 @@ namespace Project.Web.Api.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll(int size, int page)
         {
-            var jogos = _Repository.GetAll();
+            var jogos = await _Repository.GetAll(size,page);
            
             return Ok(jogos);
         }
 
         [HttpGet]
         [Route("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var jogos = _Repository.GetById(id);
+            var jogos = await _Repository.GetById(id);
+            if (jogos == null)
+            {
+                return NotFound("Jogo não encontrado."); 
+            }
 
             return Ok(jogos);
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var DeleteJogos = _Repository.Delete(id);
+            var DeleteJogos = await _Repository.Delete(id);
 
             return Ok(DeleteJogos);
         }
 
         [HttpPut]
         [Route("{id}")]
-        public IActionResult Update(Jogos jogos,int id)
+        public async Task<IActionResult> Update(Jogos jogos,int id)
         {
-            var UpdateJogos = _Repository.Update(jogos);
+            var UpdateJogos = await _Repository.Update(jogos);
 
             return Ok(UpdateJogos);
 

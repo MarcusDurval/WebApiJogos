@@ -24,15 +24,15 @@ namespace Project.Web.Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult Add([FromBody]CategoriasDTO categoriasdto)
+        public async Task<IActionResult> Add([FromBody]CategoriasDTO categoriaDTO)
         {
-            if (categoriasdto == null || string.IsNullOrWhiteSpace(categoriasdto.Categoria))
+            if (categoriaDTO == null || string.IsNullOrWhiteSpace(categoriaDTO.Categoria))
             {
                 return BadRequest("Nome do jogo é obrigatório.");
             }
-            var categoriaMapper = _mapper.Map<Categoria_Jogos>(categoriasdto);
+            var categoriaMapper = _mapper.Map<Categoria_Jogos>(categoriaDTO);
 
-            _repository.Add(categoriaMapper);
+            await _repository.Add(categoriaMapper);
 
             var CategoriaM = _mapper.Map<CategoriasDTO>(categoriaMapper);
 
@@ -40,9 +40,10 @@ namespace Project.Web.Api.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
-            var Categoria = _repository.GetAll();
+            var Categoria = await _repository.GetAll();
+
 
             return Ok(Categoria);
         }

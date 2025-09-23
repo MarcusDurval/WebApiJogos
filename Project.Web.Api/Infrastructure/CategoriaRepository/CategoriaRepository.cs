@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using Project.Web.Api.Domain.Models;
 using Project.Web.Api.Infrastructure.Data;
 
@@ -13,53 +14,101 @@ namespace Project.Web.Api.Infrastructure.CategoriaRepository
             this.appDbContext = appDbContext;
         }
 
-        public void Add(Categoria_Jogos categoria)
+        public async Task Add(Categoria_Jogos categoria)
         {
-            appDbContext.Categoria_Jogos.Add(categoria);
-            appDbContext.SaveChanges();
-        }
-
-        public Categoria_Jogos Delete(int id)
-        {
-            var deleteCategorias = appDbContext.Categoria_Jogos.Find(id);
-
-            if(deleteCategorias != null)
+            try
             {
-                appDbContext.Remove(deleteCategorias);
-                appDbContext.SaveChanges(true);
+                appDbContext.Categoria_Jogos.Add(categoria);
+                await appDbContext.SaveChangesAsync();
             }
-
-            return deleteCategorias;
-        }
-
-        public List<Categoria_Jogos> GetAll()
-        {
-            var categoria = appDbContext.Categoria_Jogos.ToList();
-            foreach(var categorias in categoria)
+            catch (Exception ex)
             {
-                categorias.Jogos = appDbContext.Biblioteca_Jogos.FirstOrDefault(j => j.ID_Jogo == categorias.JogoId);
+
+                throw new Exception($"Erro ao adicionar dados na categoria de jogos: {ex.Message}");
             }
-            return categoria;
         }
 
-        public Categoria_Jogos GetById(int id)
+        public async Task<Categoria_Jogos> Delete(int id)
         {
-            return appDbContext.Categoria_Jogos.Find(id);
-        }
-
-        public Categoria_Jogos Update(Categoria_Jogos categoria)
-        {
-            var updateCategoria = appDbContext.Categoria_Jogos.Find(categoria.ID);
-
-            if(updateCategoria != null)
+            try
             {
-                updateCategoria.Categoria = categoria.Categoria;
-                updateCategoria.JogoId = categoria.JogoId;
+                var CategoriaJogos = await appDbContext.Categoria_Jogos.FirstOrDefaultAsync(i => i.ID == id);
+                if (CategoriaJogos == null)
+                {
+                    throw new Exception("Algo deu errado,ao obter dados por identificador!");
+                }
+                else
+                {
+                    appDbContext.Categoria_Jogos.Remove(CategoriaJogos);
+                    await appDbContext.SaveChangesAsync();
+                }
 
-                appDbContext.SaveChanges();
+                return CategoriaJogos;
             }
+            catch (Exception ex)
+            {
 
-            return updateCategoria;
+                throw new Exception($"Erro ao remover dados da categoria {ex.Message}");
+            }
+        }
+        public async Task<List<Categoria_Jogos>> GetAll()
+        {
+            try
+            {
+                var ObterCategoria = await appDbContext.Categoria_Jogos.ToListAsync();
+                foreach (var item in ObterCategoria)
+                {
+                    item.Jogos = await appDbContext.Biblioteca_Jogos.FirstOrDefaultAsync(j => j.ID_Jogo == item.JogoId);
+                }
+
+                return ObterCategoria;
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception($"Erro ao ObterDados de categoria: {ex.Message}");
+            }
+        }
+
+        public async Task<Categoria_Jogos> GetById(int id)
+        {
+            try
+            {
+                var ObterId = await appDbContext.Categoria_Jogos.FindAsync(id);
+               
+                return ObterId;
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception($"Erro ao ObterDados por identificador{ex.Message}");
+            }
+        }
+
+        public async Task<Categoria_Jogos> Update(Categoria_Jogos categoria)
+        {
+            try
+            {
+                var categoriaAtualizada = await appDbContext.Categoria_Jogos.FindAsync(categoria.ID);
+
+                if (categoriaAtualizada != null)
+                {
+                    categoriaAtualizada.Categoria = categoria.Categoria;
+                    categoriaAtualizada.JogoId = categoria.JogoId;
+                }
+                else
+                {
+                    throw new Exception("Categoria não encontrada para atualização.");
+                }
+
+                return categoriaAtualizada;
+
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception($"Erro ao Atualizar categoria:{ex.Message}");
+            }
 
         }
     }
