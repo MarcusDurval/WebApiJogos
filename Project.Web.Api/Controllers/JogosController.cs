@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Project.Web.Api.Application.Service;
 using Project.Web.Api.Domain.JogoDTO;
 using Project.Web.Api.Domain.Models;
 using Project.Web.Api.Infrastructure.JogosRepository;
@@ -11,12 +12,12 @@ namespace Project.Web.Api.Controllers
     [ApiController]
     public class JogosController : ControllerBase
     {
-        private readonly IJogoRepository _Repository;
+        private readonly IJogoService _service;
         private readonly IMapper _Mapper;
 
-        public JogosController(IJogoRepository repository, IMapper mapper)
+        public JogosController(IJogoService repository, IMapper mapper)
         {
-            _Repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _service = repository ?? throw new ArgumentNullException(nameof(repository));
             _Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
@@ -28,14 +29,15 @@ namespace Project.Web.Api.Controllers
                 return BadRequest("Nome do jogo é obrigatório.");
             }
 
-            var JogoMapping = _Mapper.Map<Jogos>(jogosDto);
-
-            await _Repository.Add(JogoMapping);
+            var jogo = _Mapper.Map<Jogos>(jogosDto);
 
 
-            var Jogos = _Mapper.Map<JogosDto>(JogoMapping);
+            var criado =  await _service.Adicionar(jogo);
 
-            return Ok(Jogos);
+
+            var retorno = _Mapper.Map<JogosDto>(criado);
+
+            return Ok(retorno);
 
             
         }
@@ -43,7 +45,7 @@ namespace Project.Web.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(int size, int page)
         {
-            var jogos = await _Repository.GetAll(size,page);
+            var jogos = await _service.ObterTotal(size,page);
            
             return Ok(jogos);
         }
@@ -52,7 +54,8 @@ namespace Project.Web.Api.Controllers
         [Route("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var jogos = await _Repository.GetById(id);
+            var jogos = await _service.ObterPorId(id);
+
             if (jogos == null)
             {
                 return NotFound("Jogo não encontrado."); 
@@ -65,18 +68,21 @@ namespace Project.Web.Api.Controllers
         [Route("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var DeleteJogos = await _Repository.Delete(id);
+            var RemoverJogos = await _service.Apagar(id);
 
-            return Ok(DeleteJogos);
+            return Ok(RemoverJogos);
         }
 
         [HttpPut]
         [Route("{id}")]
-        public async Task<IActionResult> Update(Jogos jogos,int id)
+        public async Task<IActionResult> Update(int id,JogosDto dto)
         {
-            var UpdateJogos = await _Repository.Update(jogos);
+            var JogoAtualizado = _Mapper.Map<Jogos>(dto);
+            JogoAtualizado.ID_Jogo = id;
 
-            return Ok(UpdateJogos);
+            var atualizado = await _service.Atualizar(JogoAtualizado);
+
+            return Ok(atualizado);
 
         }
 

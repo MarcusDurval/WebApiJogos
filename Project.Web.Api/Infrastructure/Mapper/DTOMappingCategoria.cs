@@ -2,7 +2,7 @@
 using Project.Web.Api.Domain.CategoriaDTO;
 using Project.Web.Api.Domain.Models;
 
-namespace Project.Web.Api.Mapper
+namespace Project.Web.Api.Infrastructure.Mapper
 {
     public class DTOMappingCategoria : Profile
     {

@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Project.Web.Api.Application.CategoriaService;
 using Project.Web.Api.Domain.CategoriaDTO;
 using Project.Web.Api.Domain.Models;
 using Project.Web.Api.Infrastructure.CategoriaRepository;
-using Project.Web.Api.Infrastructure.JogosRepository;
-using Project.Web.Api.Mapper;
 
 namespace Project.Web.Api.Controllers
 {
@@ -13,12 +11,12 @@ namespace Project.Web.Api.Controllers
     [ApiController]
     public class CategoriaController : ControllerBase
     {
-        private readonly ICategoriaRepository _repository;
+        private readonly IcategoriaService _service;
         private readonly IMapper _mapper;
 
-        public CategoriaController(ICategoriaRepository repository, IMapper mapper)
+        public CategoriaController(IcategoriaService service, IMapper mapper)
         {
-            _repository = repository  ?? throw new ArgumentNullException(nameof(repository)); 
+            _service = service ?? throw new ArgumentNullException(nameof(service)); 
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper)); 
 
         }
@@ -32,20 +30,42 @@ namespace Project.Web.Api.Controllers
             }
             var categoriaMapper = _mapper.Map<Categoria_Jogos>(categoriaDTO);
 
-            await _repository.Add(categoriaMapper);
+            var criada = await _service.Adicionar(categoriaMapper);
 
-            var CategoriaM = _mapper.Map<CategoriasDTO>(categoriaMapper);
+            var retorno = _mapper.Map<CategoriasDTO>(categoriaMapper);
 
-            return Ok(CategoriaM);
+            return Ok(retorno);
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var Categoria = await _repository.GetAll();
+            var Categoria = await _service.ObterTotal();
 
 
             return Ok(Categoria);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] CategoriasDTO categoriaDto)
+        {
+            if (categoriaDto == null)
+                return BadRequest("Dados inválidos.");
+
+            var categoria = _mapper.Map<Categoria_Jogos>(categoriaDto);
+            categoria.JogoId = id;
+
+            var atualizada = await _service.Atualizar(categoria);
+
+            return Ok(atualizada);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var removida = await _service.Apagar(id);
+
+            return Ok(removida);
         }
     }
 }
